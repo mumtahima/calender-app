@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calendar App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="btn btn-icon menu-btn" id="menuBtn" title="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="logo">
+                    <i class="fas fa-calendar-alt"></i>
+                    Calendar Pro
+                </h1>
+            </div>
+
+            <div class="header-center">
+                <button class="btn btn-icon" id="prevBtn" title="Previous">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-primary" id="todayBtn">Today</button>
+                <button class="btn btn-icon" id="nextBtn" title="Next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <h2 class="current-date" id="currentDate">January 2026</h2>
+            </div>
+
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search events...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <button class="btn btn-icon" id="themeBtn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-success" id="addEventBtn">
+                    <i class="fas fa-plus"></i> Add Event
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <button class="btn btn-block btn-primary" id="sidebarAddEventBtn">
+                    <i class="fas fa-plus"></i> Create Event
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Views</h3>
+                <div class="view-buttons">
+                    <button class="view-btn active" data-view="month">
+                        <i class="fas fa-calendar"></i> Month
+                    </button>
+                    <button class="view-btn" data-view="week">
+                        <i class="fas fa-calendar-week"></i> Week
+                    </button>
+                    <button class="view-btn" data-view="day">
+                        <i class="fas fa-calendar-day"></i> Day
+                    </button>
+                    <button class="view-btn" data-view="agenda">
+                        <i class="fas fa-list"></i> Agenda
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Mini Calendar</h3>
+                <div class="mini-calendar" id="miniCalendar"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>
+                    <span>Categories</span>
+                    <button class="btn btn-icon btn-sm" id="addCategoryBtn" title="Add Category">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </h3>
+                <div class="categories" id="categoriesList"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Quick Actions</h3>
+                <button class="btn btn-block btn-outline" id="exportBtn">
+                    <i class="fas fa-download"></i> Export Events
+                </button>
+                <button class="btn btn-block btn-outline" id="importBtn">
+                    <i class="fas fa-upload"></i> Import Events
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+                <button class="btn btn-block btn-outline" id="clearAllBtn">
+                    <i class="fas fa-trash"></i> Clear All Events
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Statistics</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Events:</span>
+                        <span class="stat-value" id="totalEvents">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Month:</span>
+                        <span class="stat-value" id="monthEvents">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Upcoming:</span>
+                        <span class="stat-value" id="upcomingEvents">0</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Calendar Views will be inserted here -->
+            <div class="calendar-view" id="calendarView"></div>
+        </main>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Event</h2>
+                <button class="btn btn-icon close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form class="modal-body" id="eventForm">
+                <div class="form-group">
+                    <label for="eventTitle">Event Title *</label>
+                    <input type="text" id="eventTitle" class="form-control" required placeholder="Enter event title">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventDate">Date *</label>
+                        <input type="date" id="eventDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="allDayEvent"> All Day Event
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row time-inputs" id="timeInputs">
+                    <div class="form-group">
+                        <label for="eventStartTime">Start Time</label>
+                        <input type="time" id="eventStartTime" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="eventEndTime">End Time</label>
+                        <input type="time" id="eventEndTime" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" class="form-control" rows="3"
+                        placeholder="Add event description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventLocation">Location</label>
+                    <input type="text" id="eventLocation" class="form-control" placeholder="Add location">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventCategory">Category</label>
+                        <select id="eventCategory" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventColor">Color</label>
+                        <input type="color" id="eventColor" class="form-control color-input" value="#4285f4">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventRecurrence">Recurrence</label>
+                    <select id="eventRecurrence" class="form-control">
+                        <option value="none">Does not repeat</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+
+                <div class="form-group recurrence-end" id="recurrenceEndGroup" style="display: none;">
+                    <label for="recurrenceEnd">End Recurrence</label>
+                    <input type="date" id="recurrenceEnd" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventReminder">Reminder</label>
+                    <select id="eventReminder" class="form-control">
+                        <option value="none">No reminder</option>
+                        <option value="0">At time of event</option>
+                        <option value="5">5 minutes before</option>
+                        <option value="15">15 minutes before</option>
+                        <option value="30">30 minutes before</option>
+                        <option value="60">1 hour before</option>
+                        <option value="1440">1 day before</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventURL">URL</label>
+                    <input type="url" id="eventURL" class="form-control" placeholder="https://example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="eventAttendees">Attendees (comma separated)</label>
+                    <input type="text" id="eventAttendees" class="form-control"
+                        placeholder="john@example.com, jane@example.com">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn"
+                        style="display: none;">Delete</button>
+                    <button type="button" class="btn btn-secondary" id="duplicateEventBtn"
+                        style="display: none;">Duplicate</button>
+                    <button type="submit" class="btn btn-primary" id="saveEventBtn">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Add Category</h2>
+                <button class="btn btn-icon close-btn" id="closeCategoryModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form class="modal-body" id="categoryForm">
+                <div class="form-group">
+                    <label for="categoryName">Category Name *</label>
+                    <input type="text" id="categoryName" class="form-control" required
+                        placeholder="e.g., Work, Personal">
+                </div>
+                <div class="form-group">
+                    <label for="categoryColor">Color</label>
+                    <input type="color" id="categoryColor" class="form-control color-input" value="#4285f4">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelCategoryBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal" id="eventDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detailsEventTitle"></h2>
+                <button class="btn btn-icon close-btn" id="closeDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="eventDetailsContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="closeDetailsBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="editEventBtn">Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div class="notifications" id="notifications"></div>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div class="modal" id="shortcutsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Keyboard Shortcuts</h2>
+                <button class="btn btn-icon close-btn" id="closeShortcutsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <kbd>N</kbd> <span>New Event</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>T</kbd> <span>Go to Today</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>←</kbd> <span>Previous Period</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>→</kbd> <span>Next Period</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>M</kbd> <span>Month View</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>W</kbd> <span>Week View</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>D</kbd> <span>Day View</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>A</kbd> <span>Agenda View</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>/</kbd> <span>Search Events</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>?</kbd> <span>Show Shortcuts</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Esc</kbd> <span>Close Modal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
