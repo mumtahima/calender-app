@@ -2,13 +2,15 @@
 
 This directory contains comprehensive, exam-focused LaTeX study notes for STA 351.
 
-## Module 1: Foundations of Multiple Random Variables
+## Modules
+
+### Module 1: Foundations of Multiple Random Variables
 
 **File:** `Module1_Joint_Distributions.tex`
 
 A complete, compilable LaTeX document covering all topics in Module 1:
 
-### Topics Covered
+#### Topics Covered
 
 1. **Joint Distributions**
    - Joint PMF (Discrete Case)
@@ -31,7 +33,49 @@ A complete, compilable LaTeX document covering all topics in Module 1:
    - Uncorrelated vs Independent (KEY DISTINCTION!)
    - Variance of Sums
 
-### Features
+---
+
+### Module 2: Derived Distributions and Transforms
+
+**File:** `Module2_Derived_Distributions.tex`
+
+A comprehensive, exam-focused LaTeX document covering transformations of random variables and moment generating functions.
+
+#### Topics Covered
+
+1. **Functions of Random Variables**
+   - Derived Distributions Concept (Y = g(X))
+   - CDF Method (Universal Approach)
+   - Transformation/Jacobian Method
+   - Special Cases:
+     * Y = X² (Uniform and Exponential examples)
+     * Y = √X
+     * Y = min{X₁, X₂, ..., Xₙ} (with backup generator example)
+     * Y = max{X₁, X₂, ..., Xₙ}
+     * Y = min{T, τ} (Timeout/Censoring - Mixed Distributions)
+
+2. **Sums of Random Variables**
+   - Convolution (Discrete and Continuous)
+   - Sum of Independent RVs (Exponential, Poisson, Normal, Binomial)
+   - Distribution of T = T₁ + T₂ + T₃ with E[T], Var(T), MGF Analysis
+
+3. **Moment Generating Functions**
+   - Definition for Discrete and Continuous RVs
+   - Finding Moments from MGF
+   - MGF Table (Bernoulli, Binomial, Geometric, Poisson, Exponential, Uniform, Normal)
+   - MGF of Sums of Independent RVs
+   - Probability Generating Functions (PGF)
+
+4. **Additional Content**
+   - Summary/Cheat Sheet with Quick Reference Tables
+   - Exam Tips and Strategy Boxes
+   - Common Mistakes Warning Boxes
+   - 5 Practice Problems with Hints and Answers
+   - 4 Python Code Snippets for Verification
+
+---
+
+## Features (Both Modules)
 
 - ✅ **Colored boxes** for definitions, theorems, warnings, and exam tips
 - ✅ **TikZ/PGFPlots visualizations** for key concepts
@@ -55,6 +99,10 @@ A complete, compilable LaTeX document covering all topics in Module 1:
 cd STA351_Notes
 pdflatex Module1_Joint_Distributions.tex
 pdflatex Module1_Joint_Distributions.tex  # Run twice for proper references
+
+# Or for Module 2:
+pdflatex Module2_Derived_Distributions.tex
+pdflatex Module2_Derived_Distributions.tex  # Run twice for proper references
 ```
 
 Or use your preferred LaTeX editor (TeXstudio, Overleaf, etc.)
