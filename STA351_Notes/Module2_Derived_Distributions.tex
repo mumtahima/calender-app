@@ -1,0 +1,1042 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================
+% PACKAGES
+% ============================================
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{booktabs}
+
+% TikZ libraries
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, patterns}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=cyan,
+    citecolor=green
+}
+
+% Listings setup for Python
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+% ============================================
+% THEOREM ENVIRONMENTS
+% ============================================
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{remark}{Remark}[section]
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+
+% ============================================
+% CUSTOM BOXES
+% ============================================
+
+% Definition box (blue)
+\newtcolorbox{defbox}[1]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% Theorem box (green)
+\newtcolorbox{thmbox}[1]{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% Warning box (red/orange)
+\newtcolorbox{warnbox}[1]{
+    colback=orange!5!white,
+    colframe=orange!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% Exam tips box (yellow)
+\newtcolorbox{exambox}[1]{
+    colback=yellow!10!white,
+    colframe=yellow!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% Example box
+\newtcolorbox{examplebox}[1]{
+    colback=gray!5!white,
+    colframe=gray!75!black,
+    fonttitle=\bfseries,
+    title=#1
+}
+
+% ============================================
+% TITLE AND DOCUMENT INFO
+% ============================================
+\title{\textbf{STA 351: Probability Models and Inference}\\
+\Large Module 2: Derived Distributions and Transforms}
+\author{Exam-Focused Study Notes}
+\date{\today}
+
+% ============================================
+% CUSTOM COMMANDS
+% ============================================
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\text{Var}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\Corr}{\text{Corr}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+% ============================================
+% DOCUMENT
+% ============================================
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================
+% INTRODUCTION
+% ============================================
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+This document provides a comprehensive, exam-focused review of Module 2 for STA 351: Probability Models and Inference. The material covers derived distributions, transformations of random variables, and moment generating functions.
+
+\begin{exambox}{Study Strategy}
+\begin{itemize}
+    \item \textbf{Master the CDF method} -- it works for all transformations
+    \item \textbf{Memorize MGF table} for common distributions
+    \item \textbf{Practice transformation problems} -- they appear frequently on exams
+    \item \textbf{Know when to use convolution} vs. MGF approach for sums
+    \item \textbf{Understand the Jacobian} for continuous transformations
+    \item \textbf{Special cases} (min, max, sums) have standard formulas worth memorizing
+\end{itemize}
+\end{exambox}
+
+% ============================================
+% SECTION 2.1: FUNCTIONS OF RANDOM VARIABLES
+% ============================================
+\section{Functions of Random Variables}
+
+\subsection{Derived Distributions Concept}
+
+\begin{defbox}{Derived Distribution}
+If $X$ is a random variable with known distribution and $g$ is a function, then $Y = g(X)$ is also a random variable. Finding the distribution of $Y$ is called finding a \textbf{derived distribution}.
+
+\textbf{Key Question:} Given the distribution of $X$ and the function $g$, what is the distribution of $Y = g(X)$?
+\end{defbox}
+
+\textbf{Why This Matters:}
+\begin{itemize}
+    \item Many real-world problems involve transforming data
+    \item We often know the distribution of one variable but need another
+    \item Examples: $Y = X^2$, $Y = e^X$, $Y = \ln(X)$, etc.
+\end{itemize}
+
+\begin{examplebox}{Motivating Example}
+\textbf{Scenario:} A random voltage $X \sim \text{Uniform}[0, 1]$ is applied to a resistor. The power dissipated is $Y = X^2$. What is the distribution of $Y$?
+
+This is a typical derived distribution problem -- we know $f_X(x)$ and need to find $f_Y(y)$.
+\end{examplebox}
+
+\subsection{CDF Method}
+
+\begin{thmbox}{CDF Method (Universal Approach)}
+To find the distribution of $Y = g(X)$:
+
+\textbf{Step 1:} Find the CDF of $Y$:
+\[
+F_Y(y) = P(Y \leq y) = P(g(X) \leq y)
+\]
+
+\textbf{Step 2:} Convert the inequality $g(X) \leq y$ to an inequality in $X$:
+\[
+F_Y(y) = P(X \in A_y)
+\]
+where $A_y = \{x : g(x) \leq y\}$
+
+\textbf{Step 3:} Calculate the probability using the distribution of $X$:
+\begin{itemize}
+    \item \textbf{Discrete:} $F_Y(y) = \sum_{x \in A_y} p_X(x)$
+    \item \textbf{Continuous:} $F_Y(y) = \int_{A_y} f_X(x)\, dx$
+\end{itemize}
+
+\textbf{Step 4:} Differentiate to get the PDF (continuous case):
+\[
+f_Y(y) = \frac{d}{dy} F_Y(y)
+\]
+\end{thmbox}
+
+\begin{warnbox}{Common Mistake}
+When solving $g(X) \leq y$ for $X$, be careful about:
+\begin{itemize}
+    \item Direction of inequalities (especially with negative functions or $1/X$)
+    \item Multiple solutions (e.g., $X^2 \leq y$ gives $-\sqrt{y} \leq X \leq \sqrt{y}$)
+    \item Domain restrictions (e.g., $\ln(X)$ requires $X > 0$)
+\end{itemize}
+\end{warnbox}
+
+\begin{examplebox}{Example 2.1: CDF Method -- Exponential Transformation}
+\textbf{Problem:} Let $X \sim \text{Uniform}[0, 1]$. Find the distribution of $Y = -\ln(X)$.
+
+\textbf{Solution:}
+
+\textbf{Step 1:} Find $F_Y(y)$ for $y > 0$:
+\begin{align*}
+F_Y(y) &= P(Y \leq y) = P(-\ln(X) \leq y)
+\end{align*}
+
+\textbf{Step 2:} Solve for $X$:
+\begin{align*}
+-\ln(X) &\leq y \\
+\ln(X) &\geq -y \\
+X &\geq e^{-y}
+\end{align*}
+
+\textbf{Step 3:} Calculate probability:
+\begin{align*}
+F_Y(y) &= P(X \geq e^{-y}) \\
+&= 1 - P(X < e^{-y}) \\
+&= 1 - F_X(e^{-y}) \\
+&= 1 - e^{-y} \quad \text{(for } y > 0\text{)}
+\end{align*}
+
+\textbf{Step 4:} Differentiate:
+\[
+f_Y(y) = \frac{d}{dy}(1 - e^{-y}) = e^{-y}, \quad y > 0
+\]
+
+\textbf{Conclusion:} $Y \sim \text{Exponential}(1)$
+
+\textbf{Insight:} This is how we generate exponential random variables from uniform ones!
+\end{examplebox}
+
+\subsection{Transformation/Jacobian Method}
+
+\begin{thmbox}{Jacobian Transformation Formula}
+If $Y = g(X)$ where $g$ is \textbf{strictly monotone} (either always increasing or always decreasing) and differentiable, then:
+
+\[
+\boxed{f_Y(y) = f_X(g^{-1}(y)) \left| \frac{dx}{dy} \right| = f_X(x) \left| \frac{dx}{dy} \right|_{x=g^{-1}(y)}}
+\]
+
+where $g^{-1}$ is the inverse function of $g$.
+
+\textbf{Intuition:} The Jacobian $\left|\frac{dx}{dy}\right|$ accounts for how the transformation "stretches" or "compresses" probability mass.
+\end{thmbox}
+
+\textbf{When to Use:}
+\begin{itemize}
+    \item When $g$ is strictly monotone (1-to-1)
+    \item Faster than CDF method when applicable
+    \item Common for linear and exponential transformations
+\end{itemize}
+
+\begin{examplebox}{Example 2.2: Jacobian Method}
+\textbf{Problem:} Let $X \sim \text{Exp}(\lambda)$. Find the distribution of $Y = 2X + 3$.
+
+\textbf{Solution:}
+
+The transformation is $y = 2x + 3$, so $x = \frac{y-3}{2}$.
+
+The Jacobian is:
+\[
+\left|\frac{dx}{dy}\right| = \left|\frac{1}{2}\right| = \frac{1}{2}
+\]
+
+Since $X \sim \text{Exp}(\lambda)$, we have $f_X(x) = \lambda e^{-\lambda x}$ for $x > 0$.
+
+Therefore:
+\begin{align*}
+f_Y(y) &= f_X\left(\frac{y-3}{2}\right) \cdot \frac{1}{2} \\
+&= \lambda e^{-\lambda(y-3)/2} \cdot \frac{1}{2} \\
+&= \frac{\lambda}{2} e^{-\lambda(y-3)/2}, \quad y > 3
+\end{align*}
+
+\textbf{Note:} This is still exponential, just shifted and scaled.
+\end{examplebox}
+
+\subsection{Special Cases}
+
+\subsubsection{Case 1: $Y = X^2$}
+
+\begin{examplebox}{Example 2.3: $Y = X^2$ with Uniform Distribution}
+\textbf{Problem:} Let $X \sim \text{Uniform}[-3, 3]$. Find the PDF of $Y = X^2$.
+
+\textbf{Solution:}
+
+For $X \sim \text{Uniform}[-3, 3]$:
+\[
+f_X(x) = \frac{1}{6}, \quad -3 \leq x \leq 3
+\]
+
+\textbf{Step 1:} Find $F_Y(y)$ for $0 \leq y \leq 9$:
+\begin{align*}
+F_Y(y) &= P(Y \leq y) = P(X^2 \leq y) \\
+&= P(-\sqrt{y} \leq X \leq \sqrt{y})
+\end{align*}
+
+\textbf{Step 2:} Calculate:
+\begin{align*}
+F_Y(y) &= \int_{-\sqrt{y}}^{\sqrt{y}} \frac{1}{6}\, dx \\
+&= \frac{1}{6} \cdot 2\sqrt{y} = \frac{\sqrt{y}}{3}
+\end{align*}
+
+\textbf{Step 3:} Differentiate:
+\[
+f_Y(y) = \frac{d}{dy}\left(\frac{\sqrt{y}}{3}\right) = \frac{1}{6\sqrt{y}}, \quad 0 < y < 9
+\]
+
+\textbf{Insight:} Notice the PDF has a singularity at $y = 0$ (goes to infinity). This is typical for $Y = X^2$ transformations.
+\end{examplebox}
+
+\begin{examplebox}{Example 2.4: $Y = X^2$ with Exponential Distribution}
+\textbf{Problem:} Let $X \sim \text{Exp}(\lambda)$. Find the distribution of $Y = X^2$.
+
+\textbf{Solution:}
+
+For $y > 0$:
+\begin{align*}
+F_Y(y) &= P(X^2 \leq y) = P(X \leq \sqrt{y}) \quad \text{(since } X > 0\text{)} \\
+&= F_X(\sqrt{y}) = 1 - e^{-\lambda\sqrt{y}}
+\end{align*}
+
+Differentiating:
+\begin{align*}
+f_Y(y) &= \frac{d}{dy}(1 - e^{-\lambda\sqrt{y}}) \\
+&= e^{-\lambda\sqrt{y}} \cdot \lambda \cdot \frac{1}{2\sqrt{y}} \\
+&= \frac{\lambda}{2\sqrt{y}} e^{-\lambda\sqrt{y}}, \quad y > 0
+\end{align*}
+\end{examplebox}
+
+\subsubsection{Case 2: $Y = \sqrt{X}$}
+
+\begin{thmbox}{Square Root Transformation}
+If $X$ has PDF $f_X(x)$ for $x \geq 0$ and $Y = \sqrt{X}$, then:
+\[
+f_Y(y) = 2y \cdot f_X(y^2), \quad y \geq 0
+\]
+
+\textbf{Derivation:} Use the Jacobian method with $x = y^2$, so $\frac{dx}{dy} = 2y$.
+\end{thmbox}
+
+\subsubsection{Case 3: Minimum of i.i.d. Random Variables}
+
+\begin{thmbox}{Distribution of Minimum}
+Let $X_1, X_2, \ldots, X_n$ be i.i.d. random variables with CDF $F_X(x)$. Define:
+\[
+Y = \min\{X_1, X_2, \ldots, X_n\}
+\]
+
+Then the CDF of $Y$ is:
+\[
+\boxed{F_Y(y) = 1 - [1 - F_X(y)]^n}
+\]
+
+If $X_i$ are continuous with PDF $f_X(x)$, then:
+\[
+\boxed{f_Y(y) = n \cdot f_X(y) \cdot [1 - F_X(y)]^{n-1}}
+\]
+
+\textbf{Intuition:} The minimum exceeds $y$ only if ALL variables exceed $y$.
+\end{thmbox}
+
+\begin{examplebox}{Example 2.5: Backup Generator (Minimum)}
+\textbf{Problem:} A system has $n = 3$ backup generators. Each generator's lifetime is $T_i \sim \text{Exp}(\lambda)$ with $\lambda = 0.1$ failures/hour. The system fails when the first generator fails. Find the distribution of system lifetime $T = \min\{T_1, T_2, T_3\}$.
+
+\textbf{Solution:}
+
+For exponential: $F_X(t) = 1 - e^{-\lambda t}$
+
+Using the minimum formula:
+\begin{align*}
+F_T(t) &= 1 - [1 - F_X(t)]^3 \\
+&= 1 - [1 - (1 - e^{-\lambda t})]^3 \\
+&= 1 - [e^{-\lambda t}]^3 \\
+&= 1 - e^{-3\lambda t}
+\end{align*}
+
+This is $\text{Exp}(3\lambda) = \text{Exp}(0.3)$.
+
+The PDF is:
+\[
+f_T(t) = 3\lambda e^{-3\lambda t} = 0.3 e^{-0.3t}, \quad t > 0
+\]
+
+\textbf{Conclusion:} The minimum of $n$ i.i.d. $\text{Exp}(\lambda)$ is $\text{Exp}(n\lambda)$.
+
+\textbf{Mean lifetime:} $\E[T] = \frac{1}{3\lambda} = \frac{1}{0.3} \approx 3.33$ hours (much shorter than individual mean of 10 hours!)
+\end{examplebox}
+
+\subsubsection{Case 4: Maximum of i.i.d. Random Variables}
+
+\begin{thmbox}{Distribution of Maximum}
+Let $X_1, X_2, \ldots, X_n$ be i.i.d. random variables with CDF $F_X(x)$. Define:
+\[
+Y = \max\{X_1, X_2, \ldots, X_n\}
+\]
+
+Then the CDF of $Y$ is:
+\[
+\boxed{F_Y(y) = [F_X(y)]^n}
+\]
+
+If $X_i$ are continuous with PDF $f_X(x)$, then:
+\[
+\boxed{f_Y(y) = n \cdot [F_X(y)]^{n-1} \cdot f_X(y)}
+\]
+
+\textbf{Intuition:} The maximum is at most $y$ only if ALL variables are at most $y$.
+\end{thmbox}
+
+\begin{examplebox}{Example 2.6: Maximum of Uniforms}
+\textbf{Problem:} Let $X_1, X_2, X_3$ be i.i.d. $\text{Uniform}[0, 1]$. Find $f_Y(y)$ where $Y = \max\{X_1, X_2, X_3\}$.
+
+\textbf{Solution:}
+
+For $X \sim \text{Uniform}[0, 1]$: $F_X(x) = x$ for $0 \leq x \leq 1$.
+
+Therefore:
+\[
+F_Y(y) = [F_X(y)]^3 = y^3, \quad 0 \leq y \leq 1
+\]
+
+\[
+f_Y(y) = 3y^2, \quad 0 \leq y \leq 1
+\]
+
+\textbf{Note:} This is a Beta(3, 1) distribution. The maximum tends to be close to 1.
+\end{examplebox}
+
+\subsubsection{Case 5: Timeout/Censoring -- Mixed Distributions}
+
+\begin{defbox}{Mixed Distribution (Timeout Model)}
+Consider a system where we measure time $T$ until an event occurs, but stop observing at time $\tau$ (timeout). Define:
+\[
+Y = \min\{T, \tau\}
+\]
+
+If $T$ is continuous with PDF $f_T(t)$, then $Y$ has a \textbf{mixed distribution}:
+\begin{itemize}
+    \item \textbf{Point mass at $\tau$:} $P(Y = \tau) = P(T \geq \tau)$
+    \item \textbf{Continuous part for $y < \tau$:} $f_Y(y) = f_T(y)$
+\end{itemize}
+
+The CDF is:
+\[
+F_Y(y) = \begin{cases}
+F_T(y) & \text{if } y < \tau \\
+1 & \text{if } y \geq \tau
+\end{cases}
+\]
+\end{defbox}
+
+\begin{examplebox}{Example 2.7: Censored Exponential}
+\textbf{Problem:} A component lifetime is $T \sim \text{Exp}(0.5)$ (mean = 2 hours). We stop observation at $\tau = 5$ hours. Find the distribution of $Y = \min\{T, 5\}$.
+
+\textbf{Solution:}
+
+\textbf{Point mass:}
+\[
+P(Y = 5) = P(T \geq 5) = e^{-0.5 \cdot 5} = e^{-2.5} \approx 0.082
+\]
+
+\textbf{Continuous part for $y < 5$:}
+\[
+f_Y(y) = 0.5 e^{-0.5y}, \quad 0 < y < 5
+\]
+
+\textbf{CDF:}
+\[
+F_Y(y) = \begin{cases}
+1 - e^{-0.5y} & \text{if } 0 < y < 5 \\
+1 & \text{if } y \geq 5
+\end{cases}
+\]
+
+\textbf{Interpretation:} There's an 8.2\% chance the component survives past the 5-hour observation period.
+\end{examplebox}
+
+% ============================================
+% SECTION 2.2: SUMS OF RANDOM VARIABLES
+% ============================================
+\section{Sums of Random Variables}
+
+\subsection{Convolution}
+
+\begin{defbox}{Convolution Formula}
+If $X$ and $Y$ are independent random variables and $Z = X + Y$, the distribution of $Z$ is found by \textbf{convolution}:
+
+\textbf{Discrete Case:}
+\[
+\boxed{p_Z(z) = \sum_x p_X(x) \cdot p_Y(z - x)}
+\]
+
+\textbf{Continuous Case:}
+\[
+\boxed{f_Z(z) = \int_{-\infty}^{\infty} f_X(x) \cdot f_Y(z - x)\, dx}
+\]
+
+\textbf{Intuition:} For each way to write $z = x + y$, multiply the probabilities/densities and sum/integrate.
+\end{defbox}
+
+\begin{examplebox}{Example 2.8: Convolution -- Sum of Two Dice}
+\textbf{Problem:} Two fair dice are rolled. Let $X$ be the value on die 1, $Y$ the value on die 2. Find $p_Z(7)$ where $Z = X + Y$.
+
+\textbf{Solution:}
+
+Using convolution:
+\begin{align*}
+p_Z(7) &= \sum_{x=1}^{6} p_X(x) \cdot p_Y(7 - x) \\
+&= \sum_{x=1}^{6} \frac{1}{6} \cdot p_Y(7-x)
+\end{align*}
+
+The pairs $(x, y)$ that sum to 7 are: $(1,6), (2,5), (3,4), (4,3), (5,2), (6,1)$ -- 6 pairs.
+
+Therefore:
+\[
+p_Z(7) = 6 \cdot \frac{1}{6} \cdot \frac{1}{6} = \frac{6}{36} = \frac{1}{6}
+\]
+\end{examplebox}
+
+\subsection{Sums of Independent Random Variables}
+
+\begin{thmbox}{Important Sums}
+For independent random variables:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Distribution} & \textbf{Sum Property} \\
+\hline
+$X_i \sim \text{Exp}(\lambda)$ (i.i.d.) & $\sum_{i=1}^n X_i \sim \text{Gamma}(n, \lambda)$ \\
+\hline
+$X_i \sim \text{Poisson}(\lambda_i)$ (indep.) & $\sum_{i=1}^n X_i \sim \text{Poisson}\left(\sum_{i=1}^n \lambda_i\right)$ \\
+\hline
+$X_i \sim N(\mu_i, \sigma_i^2)$ (indep.) & $\sum_{i=1}^n X_i \sim N\left(\sum \mu_i, \sum \sigma_i^2\right)$ \\
+\hline
+$X_i \sim \text{Binomial}(n_i, p)$ (indep., same $p$) & $\sum_{i=1}^k X_i \sim \text{Binomial}\left(\sum n_i, p\right)$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{thmbox}
+
+\begin{warnbox}{Warning: Binomial Sum}
+For binomial sums, the probability parameter $p$ must be the SAME for all variables. If $p$ values differ, the sum is NOT binomial!
+\end{warnbox}
+
+\subsection{Distribution of $T = T_1 + T_2 + T_3$}
+
+\begin{examplebox}{Example 2.9: Sum of Service Times}
+\textbf{Problem:} Three tasks have independent service times: $T_1 \sim \text{Exp}(2)$, $T_2 \sim \text{Exp}(2)$, $T_3 \sim \text{Exp}(2)$. Find the distribution and statistics of $T = T_1 + T_2 + T_3$.
+
+\textbf{Solution:}
+
+\textbf{Distribution:} Since all three are i.i.d. $\text{Exp}(2)$:
+\[
+T \sim \text{Gamma}(3, 2)
+\]
+
+with PDF:
+\[
+f_T(t) = \frac{2^3}{\Gamma(3)} t^{3-1} e^{-2t} = 4t^2 e^{-2t}, \quad t > 0
+\]
+
+\textbf{Expected Value:}
+\[
+\E[T] = \E[T_1] + \E[T_2] + \E[T_3] = \frac{1}{2} + \frac{1}{2} + \frac{1}{2} = \frac{3}{2}
+\]
+
+\textbf{Variance:} (using independence)
+\[
+\Var(T) = \Var(T_1) + \Var(T_2) + \Var(T_3) = \frac{1}{4} + \frac{1}{4} + \frac{1}{4} = \frac{3}{4}
+\]
+
+\textbf{MGF:}
+\[
+M_T(t) = M_{T_1}(t) \cdot M_{T_2}(t) \cdot M_{T_3}(t) = \left(\frac{2}{2-t}\right)^3, \quad t < 2
+\]
+
+\textbf{Verification using MGF:}
+\begin{align*}
+\E[T] &= M_T'(0) = \frac{3}{2} \quad \checkmark \\
+\E[T^2] &= M_T''(0) = 3 \\
+\Var(T) &= \E[T^2] - (\E[T])^2 = 3 - \frac{9}{4} = \frac{3}{4} \quad \checkmark
+\end{align*}
+\end{examplebox}
+
+% ============================================
+% SECTION 2.3: MOMENT GENERATING FUNCTIONS
+% ============================================
+\section{Moment Generating Functions}
+
+\subsection{Definition}
+
+\begin{defbox}{Moment Generating Function (MGF)}
+The \textbf{moment generating function} of a random variable $X$ is:
+
+\textbf{Discrete:}
+\[
+M_X(t) = \E[e^{tX}] = \sum_x e^{tx} p_X(x)
+\]
+
+\textbf{Continuous:}
+\[
+M_X(t) = \E[e^{tX}] = \int_{-\infty}^{\infty} e^{tx} f_X(x)\, dx
+\]
+
+provided the expectation exists for $t$ in some neighborhood of 0.
+
+\textbf{Intuition:} The MGF encodes all moments (hence the name) of the distribution in a single function.
+\end{defbox}
+
+\textbf{Why MGFs Are Useful:}
+\begin{enumerate}
+    \item \textbf{Uniqueness:} If $M_X(t) = M_Y(t)$, then $X$ and $Y$ have the same distribution
+    \item \textbf{Finding moments:} Derivatives at 0 give moments
+    \item \textbf{Sums:} For independent $X, Y$: $M_{X+Y}(t) = M_X(t) \cdot M_Y(t)$
+    \item \textbf{Identification:} Recognize distributions by their MGF
+\end{enumerate}
+
+\subsection{Finding Moments from MGF}
+
+\begin{thmbox}{Moments from MGF}
+If $M_X(t)$ is the MGF of $X$, then:
+
+\[
+\boxed{\E[X^n] = M_X^{(n)}(0) = \left.\frac{d^n}{dt^n} M_X(t)\right|_{t=0}}
+\]
+
+Specifically:
+\begin{align*}
+\E[X] &= M_X'(0) \\
+\E[X^2] &= M_X''(0) \\
+\Var(X) &= M_X''(0) - [M_X'(0)]^2
+\end{align*}
+\end{thmbox}
+
+\begin{examplebox}{Example 2.10: Finding Moments from MGF}
+\textbf{Problem:} Let $X \sim \text{Exp}(\lambda)$ with MGF $M_X(t) = \frac{\lambda}{\lambda - t}$ for $t < \lambda$. Find $\E[X]$ and $\Var(X)$.
+
+\textbf{Solution:}
+
+\textbf{First derivative:}
+\[
+M_X'(t) = \frac{d}{dt}\left(\frac{\lambda}{\lambda - t}\right) = \frac{\lambda}{(\lambda - t)^2}
+\]
+
+\[
+\E[X] = M_X'(0) = \frac{\lambda}{\lambda^2} = \frac{1}{\lambda}
+\]
+
+\textbf{Second derivative:}
+\[
+M_X''(t) = \frac{d}{dt}\left(\frac{\lambda}{(\lambda - t)^2}\right) = \frac{2\lambda}{(\lambda - t)^3}
+\]
+
+\[
+\E[X^2] = M_X''(0) = \frac{2\lambda}{\lambda^3} = \frac{2}{\lambda^2}
+\]
+
+\textbf{Variance:}
+\[
+\Var(X) = \E[X^2] - (\E[X])^2 = \frac{2}{\lambda^2} - \frac{1}{\lambda^2} = \frac{1}{\lambda^2}
+\]
+\end{examplebox}
+
+\subsection{MGF Table of Common Distributions}
+
+\begin{thmbox}{MGF Reference Table}
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Distribution} & \textbf{Parameters} & \textbf{MGF} $M_X(t)$ \\
+\hline
+Bernoulli & $p \in (0,1)$ & $1 - p + pe^t$ \\
+\hline
+Binomial & $n \in \N$, $p \in (0,1)$ & $(1 - p + pe^t)^n$ \\
+\hline
+Geometric & $p \in (0,1)$ & $\frac{pe^t}{1 - (1-p)e^t}$, $t < -\ln(1-p)$ \\
+\hline
+Poisson & $\lambda > 0$ & $e^{\lambda(e^t - 1)}$ \\
+\hline
+Exponential & $\lambda > 0$ & $\frac{\lambda}{\lambda - t}$, $t < \lambda$ \\
+\hline
+Uniform & $[a, b]$ & $\frac{e^{tb} - e^{ta}}{t(b-a)}$, $t \neq 0$ \\
+\hline
+Normal & $\mu \in \R$, $\sigma^2 > 0$ & $e^{\mu t + \frac{1}{2}\sigma^2 t^2}$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{thmbox}
+
+\begin{exambox}{Exam Tip: Memorize These MGFs}
+The MGFs for Bernoulli, Binomial, Poisson, Exponential, and Normal appear most frequently on exams. Practice deriving them, but also memorize for quick recognition.
+\end{exambox}
+
+\subsection{MGF of Sums of Independent Random Variables}
+
+\begin{thmbox}{MGF of Sums}
+If $X_1, X_2, \ldots, X_n$ are independent random variables and $S = X_1 + X_2 + \cdots + X_n$, then:
+
+\[
+\boxed{M_S(t) = M_{X_1}(t) \cdot M_{X_2}(t) \cdots M_{X_n}(t) = \prod_{i=1}^n M_{X_i}(t)}
+\]
+
+\textbf{Key Insight:} This is often easier than convolution for finding the distribution of sums!
+\end{thmbox}
+
+\begin{examplebox}{Example 2.11: Sum of Poissons via MGF}
+\textbf{Problem:} Let $X_1 \sim \text{Poisson}(\lambda_1)$ and $X_2 \sim \text{Poisson}(\lambda_2)$ be independent. Find the distribution of $S = X_1 + X_2$.
+
+\textbf{Solution:}
+
+The MGFs are:
+\begin{align*}
+M_{X_1}(t) &= e^{\lambda_1(e^t - 1)} \\
+M_{X_2}(t) &= e^{\lambda_2(e^t - 1)}
+\end{align*}
+
+Therefore:
+\begin{align*}
+M_S(t) &= M_{X_1}(t) \cdot M_{X_2}(t) \\
+&= e^{\lambda_1(e^t - 1)} \cdot e^{\lambda_2(e^t - 1)} \\
+&= e^{(\lambda_1 + \lambda_2)(e^t - 1)}
+\end{align*}
+
+\textbf{Recognition:} This is the MGF of $\text{Poisson}(\lambda_1 + \lambda_2)$.
+
+\textbf{Conclusion:} $S \sim \text{Poisson}(\lambda_1 + \lambda_2)$
+\end{examplebox}
+
+\subsection{Probability Generating Functions (PGF)}
+
+\begin{defbox}{Probability Generating Function}
+For a \textbf{non-negative integer-valued} random variable $X$, the \textbf{PGF} is:
+
+\[
+\boxed{G_X(s) = \E[s^X] = \sum_{k=0}^{\infty} s^k P(X = k)}
+\]
+
+\textbf{Relationship to MGF:} $G_X(s) = M_X(\ln s)$
+
+\textbf{Uses:}
+\begin{itemize}
+    \item Finding probabilities: $P(X = k) = \frac{1}{k!} G_X^{(k)}(0)$
+    \item Finding moments: $\E[X] = G_X'(1)$
+    \item Sums: $G_{X+Y}(s) = G_X(s) \cdot G_Y(s)$ if independent
+\end{itemize}
+\end{defbox}
+
+\begin{examplebox}{Example 2.12: PGF of Binomial}
+\textbf{Problem:} Find the PGF of $X \sim \text{Binomial}(n, p)$.
+
+\textbf{Solution:}
+
+\begin{align*}
+G_X(s) &= \E[s^X] = \sum_{k=0}^n s^k \binom{n}{k} p^k (1-p)^{n-k} \\
+&= \sum_{k=0}^n \binom{n}{k} (ps)^k (1-p)^{n-k} \\
+&= (ps + 1 - p)^n \quad \text{(binomial theorem)} \\
+&= [1 - p + ps]^n
+\end{align*}
+
+\textbf{Finding mean:}
+\[
+G_X'(s) = n[1 - p + ps]^{n-1} \cdot p
+\]
+\[
+\E[X] = G_X'(1) = n[1]^{n-1} \cdot p = np \quad \checkmark
+\]
+\end{examplebox}
+
+% ============================================
+% SUMMARY SECTION
+% ============================================
+\section{Summary and Cheat Sheet}
+
+\begin{thmbox}{Quick Reference: Transformation Methods}
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Method} & \textbf{When to Use} \\
+\hline
+CDF Method & Always works; find $F_Y(y) = P(g(X) \leq y)$ \\
+\hline
+Jacobian & $g$ is strictly monotone and differentiable \\
+\hline
+Convolution & Sum of independent RVs (but MGF is often easier) \\
+\hline
+MGF & Identifying distributions, finding moments, sums \\
+\hline
+\end{tabular}
+\end{center}
+\end{thmbox}
+
+\begin{thmbox}{Key Formulas Summary}
+\textbf{Transformations:}
+\[
+f_Y(y) = f_X(x) \left|\frac{dx}{dy}\right|_{x=g^{-1}(y)}
+\]
+
+\textbf{Min/Max of i.i.d.:}
+\begin{align*}
+F_{\min}(y) &= 1 - [1 - F_X(y)]^n \\
+F_{\max}(y) &= [F_X(y)]^n
+\end{align*}
+
+\textbf{Convolution:}
+\[
+f_{X+Y}(z) = \int_{-\infty}^{\infty} f_X(x) f_Y(z-x)\, dx
+\]
+
+\textbf{MGF Properties:}
+\begin{align*}
+\E[X^n] &= M_X^{(n)}(0) \\
+M_{X+Y}(t) &= M_X(t) \cdot M_Y(t) \quad \text{(if independent)}
+\end{align*}
+\end{thmbox}
+
+\begin{exambox}{Top Exam Tips}
+\begin{enumerate}
+    \item \textbf{Always start with the CDF method} if you're unsure
+    \item \textbf{Check your domain} -- where is the transformed variable defined?
+    \item \textbf{Watch inequality directions} when solving $g(X) \leq y$
+    \item \textbf{For sums, try MGF first} -- it's usually faster than convolution
+    \item \textbf{Memorize min/max formulas} for exponentials and uniforms
+    \item \textbf{Know MGFs cold} -- you can identify distributions instantly
+    \item \textbf{Don't forget the Jacobian} (the $|dx/dy|$ term)
+\end{enumerate}
+\end{exambox}
+
+\begin{warnbox}{Common Mistakes to Avoid}
+\begin{enumerate}
+    \item \textbf{Forgetting absolute value} in Jacobian: $\left|\frac{dx}{dy}\right|$
+    \item \textbf{Wrong inequality direction} after transformation (especially with $1/X$ or $-X$)
+    \item \textbf{Missing the domain} of transformed variable
+    \item \textbf{Confusing min and max} formulas
+    \item \textbf{Using MGF for dependent variables} (only works for independent!)
+    \item \textbf{Forgetting to check} if MGF exists
+    \item \textbf{Mixing up PGF and MGF} -- PGF uses $s^X$, MGF uses $e^{tX}$
+\end{enumerate}
+\end{warnbox}
+
+% ============================================
+% PRACTICE PROBLEMS
+% ============================================
+\section{Practice Problems}
+
+\begin{examplebox}{Problem 1: CDF Method}
+\textbf{Problem:} Let $X \sim \text{Uniform}[0, 2]$. Find the PDF of $Y = X^3$.
+
+\textbf{Hint:} Use CDF method. For $0 < y < 8$, solve $X^3 \leq y$.
+
+\textbf{Answer:} $f_Y(y) = \frac{1}{6y^{2/3}}$ for $0 < y < 8$
+\end{examplebox}
+
+\begin{examplebox}{Problem 2: Jacobian Method}
+\textbf{Problem:} Let $X \sim N(0, 1)$. Find the distribution of $Y = 3X + 2$.
+
+\textbf{Hint:} Linear transformation of normal.
+
+\textbf{Answer:} $Y \sim N(2, 9)$
+\end{examplebox}
+
+\begin{examplebox}{Problem 3: Maximum Distribution}
+\textbf{Problem:} Three components have independent lifetimes $T_i \sim \text{Exp}(0.5)$. The system functions as long as at least one component works. Find the distribution of system lifetime $T = \max\{T_1, T_2, T_3\}$.
+
+\textbf{Hint:} Use the maximum formula with $F_X(t) = 1 - e^{-0.5t}$.
+
+\textbf{Answer:} $f_T(t) = 3(1 - e^{-0.5t})^2 \cdot 0.5e^{-0.5t}$ for $t > 0$
+\end{examplebox}
+
+\begin{examplebox}{Problem 4: Sum via MGF}
+\textbf{Problem:} Let $X_1, X_2, X_3$ be i.i.d. $\text{Exp}(3)$. Find the distribution of $S = X_1 + X_2 + X_3$ using MGF.
+
+\textbf{Hint:} $M_{X_i}(t) = \frac{3}{3-t}$. Multiply them and recognize the result.
+
+\textbf{Answer:} $S \sim \text{Gamma}(3, 3)$ with MGF $M_S(t) = \left(\frac{3}{3-t}\right)^3$
+\end{examplebox}
+
+\begin{examplebox}{Problem 5: Mixed Distribution}
+\textbf{Problem:} A random variable $T \sim \text{Uniform}[0, 10]$ represents a waiting time, but if $T > 7$, we record $Y = 7$. Otherwise $Y = T$. Find $P(Y = 7)$ and $f_Y(y)$ for $y < 7$.
+
+\textbf{Hint:} This is a censored/truncated distribution.
+
+\textbf{Answer:} $P(Y = 7) = P(T > 7) = 0.3$; $f_Y(y) = 0.1$ for $0 < y < 7$
+\end{examplebox}
+
+% ============================================
+% PYTHON CODE SECTION
+% ============================================
+\section{Python Code for Verification}
+
+\begin{lstlisting}[caption={Simulating Transformed Distributions}]
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Example: Y = -ln(X) where X ~ Uniform(0,1)
+# Theory: Y ~ Exp(1)
+
+np.random.seed(42)
+n = 10000
+
+# Generate X ~ Uniform(0,1)
+X = np.random.uniform(0, 1, n)
+
+# Transform to Y = -ln(X)
+Y = -np.log(X)
+
+# Plot histogram
+plt.figure(figsize=(10, 6))
+plt.hist(Y, bins=50, density=True, alpha=0.7, label='Simulated Y')
+
+# Overlay theoretical Exp(1) PDF
+y_vals = np.linspace(0, 10, 1000)
+plt.plot(y_vals, stats.expon.pdf(y_vals, scale=1), 
+         'r-', linewidth=2, label='Theoretical Exp(1)')
+
+plt.xlabel('y')
+plt.ylabel('Density')
+plt.title('Y = -ln(X) where X ~ Uniform(0,1)')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+
+print(f"Sample mean: {np.mean(Y):.3f} (Theory: 1.000)")
+print(f"Sample variance: {np.var(Y):.3f} (Theory: 1.000)")
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Minimum of Exponentials}]
+import numpy as np
+from scipy import stats
+
+# Example: Min of 3 i.i.d. Exp(0.1)
+# Theory: Min ~ Exp(0.3)
+
+np.random.seed(42)
+n_sims = 10000
+n_vars = 3
+lambda_rate = 0.1
+
+# Generate n_vars exponential RVs for each simulation
+X = np.random.exponential(scale=1/lambda_rate, size=(n_sims, n_vars))
+
+# Compute minimum
+Y = np.min(X, axis=1)
+
+# Statistics
+print(f"Sample mean: {np.mean(Y):.3f} (Theory: {1/(n_vars*lambda_rate):.3f})")
+print(f"Sample variance: {np.var(Y):.3f} (Theory: {1/(n_vars*lambda_rate)**2:.3f})")
+
+# Kolmogorov-Smirnov test
+ks_stat, p_value = stats.kstest(Y, 'expon', args=(0, 1/(n_vars*lambda_rate)))
+print(f"KS test p-value: {p_value:.4f}")
+print("If p > 0.05, we fail to reject that Y ~ Exp(0.3)")
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Sum of Poissons via MGF}]
+import numpy as np
+from scipy import stats
+
+# Example: X1 ~ Poisson(5), X2 ~ Poisson(3)
+# Theory: X1 + X2 ~ Poisson(8)
+
+np.random.seed(42)
+n = 10000
+
+X1 = np.random.poisson(5, n)
+X2 = np.random.poisson(3, n)
+S = X1 + X2
+
+# Compare to Poisson(8)
+theoretical = np.random.poisson(8, n)
+
+print(f"Sample mean of sum: {np.mean(S):.3f} (Theory: 8.000)")
+print(f"Sample variance of sum: {np.var(S):.3f} (Theory: 8.000)")
+
+# Chi-square goodness of fit
+observed_counts = np.bincount(S)
+k_max = len(observed_counts)
+expected_probs = stats.poisson.pmf(range(k_max), 8)
+expected_counts = expected_probs * n
+
+# Remove bins with expected count < 5
+mask = expected_counts >= 5
+chi2_stat = np.sum((observed_counts[mask] - expected_counts[mask])**2 
+                   / expected_counts[mask])
+dof = np.sum(mask) - 1 - 1  # -1 for normalization, -1 for estimated param
+p_value = 1 - stats.chi2.cdf(chi2_stat, dof)
+
+print(f"Chi-square test p-value: {p_value:.4f}")
+print("If p > 0.05, consistent with Poisson(8)")
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Computing Moments from MGF Numerically}]
+import numpy as np
+from scipy.misc import derivative
+
+# Example: Exponential(lambda=2) MGF
+def mgf_exp(t, lam=2):
+    """MGF of Exp(lambda)"""
+    if t >= lam:
+        return np.inf
+    return lam / (lam - t)
+
+# Compute derivatives at t=0
+E_X = derivative(mgf_exp, 0, n=1, dx=1e-6)
+E_X2 = derivative(mgf_exp, 0, n=2, dx=1e-6)
+Var_X = E_X2 - E_X**2
+
+print(f"E[X] from MGF: {E_X:.6f} (Theory: {1/2:.6f})")
+print(f"Var(X) from MGF: {Var_X:.6f} (Theory: {1/4:.6f})")
+
+# Verify with simulation
+np.random.seed(42)
+X_samples = np.random.exponential(scale=1/2, size=100000)
+print(f"\nFrom simulation:")
+print(f"E[X]: {np.mean(X_samples):.6f}")
+print(f"Var(X): {np.var(X_samples):.6f}")
+\end{lstlisting}
+
+% ============================================
+% END OF DOCUMENT
+% ============================================
+
+\end{document}
